@@ -21,6 +21,13 @@ def parsePrefPage(rootP):
         htlID = mtch[1]
         img = htl.xpath('div[@class="detail clearfix"]//div[@class="detail-r"]/img')
         htlSize = img[0].attrib['src']
+
+        svcSpa = htl.xpath('div[@class="detail clearfix"]//div[@class="detail-l"]/ul[@class="pet_serviceicon clear_f"]/li/img[@src="images/peticon_005.png"]')
+        if svcSpa:
+            txtSpa = '温泉あり'
+        else:
+            txtSpa = '温泉なし'
+        
         dicPlace = {}
         tblPlace = htl.xpath('div[@class="detail clearfix"]//table[@class="place_table"]')[0]
         for tr in tblPlace.xpath('tr')[1:]:
@@ -34,13 +41,14 @@ def parsePrefPage(rootP):
                 cnt = '-'
             else:
                 rootK = html.fromstring(cont)
-                pnt = rootK.xpath('//span[@class="jlnpc-kuchikomi__point"]')[0].text
+                lPnt = rootK.xpath('//span[@class="jlnpc-kuchikomi__point"]')
+                pnt = lPnt[0].text if lPnt else '-'
                 lCnt = rootK.xpath('//div[@class="jlnpc-kuchikomi__sortNav__count"]/p')
                 cnt = lCnt[0].text if lCnt else '-'
-            print("\t".join([htlArea, htlName, dicSize[htlSize], dicPlace['プレイルーム'], pnt, cnt, 'https://www.jalan.net/' + htlID]), file=fpOut)
+            print("\t".join([htlArea, htlName, dicSize[htlSize], txtSpa, dicPlace['プレイルーム'], pnt, cnt, 'https://www.jalan.net/' + htlID]), file=fpOut)
 
-fpOut = open('result.txt', 'w')
-print("\t".join(['エリア', 'ホテル', 'サイズ', 'プレイルーム', '評価', '件数', 'URL']), file=fpOut)
+fpOut = open('result.txt', 'w', encoding='utf-8')
+print("\t".join(['エリア', 'ホテル', 'サイズ', '温泉', 'プレイルーム', '評価', '件数', 'URL']), file=fpOut)
 contTop = KbGeneral.getUrl(urlTop)
 root = html.fromstring(contTop)
 for lnk in root.xpath('//dd/a'):
