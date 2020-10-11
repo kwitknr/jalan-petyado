@@ -1,2 +1,2 @@
 # jalan-petyado
-For 
+Make hotel list from Jalan Petyado page
