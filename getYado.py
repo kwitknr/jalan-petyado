@@ -5,7 +5,6 @@ import re
 import lxml.html as html
 
 urlTop = 'https://www.jalan.net/pet/'
-
 ptnHref = re.compile('/([^/]+)/')
 dicSize = {'images/peticon_b.png':'大型犬', 
            'images/peticon_m.png':'中型犬', 
@@ -34,7 +33,6 @@ def parsePrefPage(rootP):
                 pnt = '-'
                 cnt = '-'
             else:
-                print(htlName, htlID)
                 rootK = html.fromstring(cont)
                 pnt = rootK.xpath('//span[@class="jlnpc-kuchikomi__point"]')[0].text
                 lCnt = rootK.xpath('//div[@class="jlnpc-kuchikomi__sortNav__count"]/p')
