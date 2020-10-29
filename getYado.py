@@ -45,10 +45,22 @@ def parsePrefPage(rootP):
                 pnt = lPnt[0].text if lPnt else '-'
                 lCnt = rootK.xpath('//div[@class="jlnpc-kuchikomi__sortNav__count"]/p')
                 cnt = lCnt[0].text if lCnt else '-'
-            print("\t".join([htlArea, htlName, dicSize[htlSize], txtSpa, dicPlace['プレイルーム'], pnt, cnt, 'https://www.jalan.net/' + htlID]), file=fpOut)
+            #部屋
+            url = 'https://www.jalan.net/' + htlID
+            cont = KbGeneral.getUrl(url)
+            rootR = html.fromstring(cont)
+            tbl = rootR.xpath('//table[@class="shisetsu-roomsetsubi_body"]//table')
+            trs = tbl[0].xpath('tr')
+            lstR = []
+            for td in trs[1].xpath('td'):
+                mtch = re.search('(\d+)', td.text)
+                r = mtch.group(1) if mtch else ''
+                lstR.append(r)
+            print("\t".join([htlArea, htlName, dicSize[htlSize], txtSpa, dicPlace['プレイルーム'], pnt, cnt] + lstR + ['https://www.jalan.net/' + htlID]), file=fpOut)
+            sys.exit()
 
 fpOut = open('result.txt', 'w', encoding='utf-8')
-print("\t".join(['エリア', 'ホテル', 'サイズ', '温泉', 'プレイルーム', '評価', '件数', 'URL']), file=fpOut)
+print("\t".join(['エリア', 'ホテル', 'サイズ', '温泉', 'プレイルーム', '評価', '件数', '洋室', '和室', '和洋室', 'その他', '総部屋数', 'URL']), file=fpOut)
 contTop = KbGeneral.getUrl(urlTop)
 root = html.fromstring(contTop)
 for lnk in root.xpath('//dd/a'):
