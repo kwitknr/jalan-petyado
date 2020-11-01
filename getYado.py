@@ -10,11 +10,13 @@ dicSize = {'images/peticon_b.png':'大型犬',
            'images/peticon_m.png':'中型犬', 
            'images/peticon_s.png':'小型犬'} 
 
+ptnNum = re.compile('(\d+)')
 def parsePrefPage(rootP):
     lstHtl = rootP.xpath('//div[@class="result"]')
     for htl in lstHtl:
         pArea = htl.xpath('div[@class="hd-bar clearfix"]/p[@class="hd-r tx10_333"]')[0]
         htlArea = pArea.text[6:]
+        (htlPref, htlTown) = htlArea.split(' > ')
         lN = htl.xpath('div[@class="detail clearfix"]//p[@class="s16_33b"]/a')[0]
         htlName = lN.text
         mtch = ptnHref.match(lN.attrib['href'])
@@ -45,10 +47,30 @@ def parsePrefPage(rootP):
                 pnt = lPnt[0].text if lPnt else '-'
                 lCnt = rootK.xpath('//div[@class="jlnpc-kuchikomi__sortNav__count"]/p')
                 cnt = lCnt[0].text if lCnt else '-'
-            print("\t".join([htlArea, htlName, dicSize[htlSize], txtSpa, dicPlace['プレイルーム'], pnt, cnt, 'https://www.jalan.net/' + htlID]), file=fpOut)
+            #部屋
+            url = 'https://www.jalan.net/' + htlID
+            cont = KbGeneral.getUrl(url)
+            rootR = html.fromstring(cont)
+            tbl = rootR.xpath('//table[@class="shisetsu-roomsetsubi_body"]//table')
+            trs = tbl[0].xpath('tr')
+            lstR = []
+            if len(trs) >= 2:
+                ths = trs[0].xpath('th')
+                if (ths[0].text == '洋室' and ths[1].text == '和室' and
+                    ths[2].text == '和洋室' and ths[3].text == 'その他' and
+                    ths[4].text == '総部屋数'):
+                    for td in trs[1].xpath('td'):
+                        mtch = ptnNum.search(td.text)
+                        r = mtch.group(1) if mtch else ''
+                        lstR.append(r)
+            for i in range(5-len(lstR)):
+                lstR.append('-')
+
+            
+            print("\t".join([htlPref, htlTown, htlName, dicSize[htlSize], txtSpa, dicPlace['プレイルーム'], pnt, cnt] + lstR + ['https://www.jalan.net/' + htlID]), file=fpOut)
 
 fpOut = open('result.txt', 'w', encoding='utf-8')
-print("\t".join(['エリア', 'ホテル', 'サイズ', '温泉', 'プレイルーム', '評価', '件数', 'URL']), file=fpOut)
+print("\t".join(['都道府県', 'エリア', 'ホテル', 'サイズ', '温泉', 'プレイルーム', '評価', '件数', '洋室', '和室', '和洋室', 'その他', '総部屋数', 'URL']), file=fpOut)
 contTop = KbGeneral.getUrl(urlTop)
 root = html.fromstring(contTop)
 for lnk in root.xpath('//dd/a'):
